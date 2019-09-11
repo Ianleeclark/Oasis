@@ -38,6 +38,18 @@ defmodule Oasis.Parser do
   """
   @spec map_json_to_swagger_struct(json_map :: map()) :: Swagger.t()
   def map_json_to_swagger_struct(json_map) when is_map(json_map) do
+    path_lookup_table =
+      json_map["paths"]
+      |> Enum.into(%{}, fn {path, operation_data} ->
+        {path, Path.from_json(operation_data)}
+      end)
+
+    Swagger.new(
+      json_map["version"],
+      json_map["security"],
+      path_lookup_table,
+      json_map["components"]
+    )
   end
 
   @doc """

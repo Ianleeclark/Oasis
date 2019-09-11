@@ -25,7 +25,8 @@ defmodule Oasis.Parser.Path do
         patch \\ nil,
         head \\ nil,
         options \\ nil,
-        trace \\ nil
+        trace \\ nil,
+        parameters \\ []
       ) do
     %__MODULE__{
       get: get,
@@ -36,9 +37,22 @@ defmodule Oasis.Parser.Path do
       head: head,
       options: options,
       trace: trace,
-      # TODO(ian): Handle this
-      parameters: []
+      parameters: parameters
     }
+  end
+
+  def from_json(json) do
+    new(
+      json["get"],
+      json["put"],
+      json["post"],
+      json["delete"],
+      json["patch"],
+      json["head"],
+      json["options"],
+      json["trace"],
+      json["parameters"]
+    )
   end
 
   def all_http_methods, do: [:get, :put, :post, :delete, :patch, :head, :options, :trace]
