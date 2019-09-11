@@ -1,7 +1,7 @@
 defmodule Oasis.Parser.Path do
   alias Oasis.Parser.Operation
 
-  @required_keys [:get, :put, :post, :delete, :patch, :head, :options, :trace, parameters]
+  @required_keys [:get, :put, :post, :delete, :patch, :head, :options, :trace, :parameters]
   @enforce_keys @required_keys
   defstruct @required_keys
 
@@ -35,7 +35,11 @@ defmodule Oasis.Parser.Path do
       patch: patch,
       head: head,
       options: options,
-      trace: trace
+      trace: trace,
+      # TODO(ian): Handle this
+      parameters: []
     }
   end
+
+  def all_http_methods, do: [:get, :put, :post, :delete, :patch, :head, :options, :trace]
 end

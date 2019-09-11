@@ -3,6 +3,8 @@ defmodule Oasis do
   Documentation for Oasis.
   """
 
+  alias Oasis.Parser
+
   @doc """
   Hello world.
 
@@ -14,5 +16,9 @@ defmodule Oasis do
   """
   def hello do
     :world
+  end
+
+  def load(json) do
+    Parser.load(json)
   end
 end

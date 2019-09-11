@@ -24,10 +24,11 @@ defmodule Oasis.Parser.Metadata do
       response_status_codes: response_status_codes,
       uri_params: uri_params,
       path: path,
-      method: http_method_string_to_atom(method)
+      method: method
     }
   end
 
+  @spec http_method_string_to_atom(String.t()) :: atom()
   def http_method_string_to_atom(http_method) when is_binary(http_method) do
     http_method
     |> String.downcase()

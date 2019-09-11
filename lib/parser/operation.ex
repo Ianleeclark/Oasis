@@ -6,7 +6,8 @@ defmodule Oasis.Parser.Operation do
     :responses,
     :callbacks,
     :deprecated,
-    :security
+    :security,
+    :requires_auth?
   ]
   @enforce_keys @required_keys
   defstruct @required_keys
@@ -15,10 +16,11 @@ defmodule Oasis.Parser.Operation do
           operation_id: String.t(),
           parameters: [map()],
           request_body: map(),
-          responses: [map()],
+          responses: [integer()],
           callbacks: [any()],
           deprecated: boolean(),
-          security: map()
+          security: map(),
+          requires_auth?: boolean()
         }
 
   def new(operation_id, parameters, request_body, responses, callbacks, deprecated, security)
@@ -29,10 +31,14 @@ defmodule Oasis.Parser.Operation do
       operation_id: operation_id,
       parameters: parameters,
       request_body: request_body,
-      responses: responses,
+      responses: Enum.map(Map.keys(responses), &String.to_integer/1),
       callbacks: callbacks,
       deprecated: deprecated,
-      security: security
+      security: security,
+      requires_auth?: requires_auth?(security)
     }
   end
+
+  @spec requires_auth?(security :: map()) :: boolean()
+  def requires_auth?(security) when is_map(security), do: Map.equal?(%{}, security)
 end
