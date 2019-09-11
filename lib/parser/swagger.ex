@@ -1,5 +1,4 @@
 defmodule Oasis.Parser.Swagger do
-
   alias Oasis.Parser.Path
 
   @required_keys [:version, :security, :paths, :components]
@@ -7,9 +6,9 @@ defmodule Oasis.Parser.Swagger do
   defstruct @required_keys
 
   @type t :: %__MODULE__{
-    version: String.t(),
-    security: map(),
-    paths: %{String.t() => Path.t()},
-    components: []
-  }
+          version: String.t(),
+          security: map(),
+          paths: %{String.t() => Path.t()},
+          components: []
+        }
 end
