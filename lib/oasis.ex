@@ -18,7 +18,16 @@ defmodule Oasis do
     :world
   end
 
-  def load(json) do
-    Parser.load(json)
+  @doc """
+  Loads a file from the specified location
+  """
+  @spec load_file(directory :: String.t()) :: binary()
+  def load_file(directory) when is_binary(directory) do
+  end
+
+  def test(directory) do
+    directory
+    |> load_file()
+    |> Parser.load()
   end
 end
