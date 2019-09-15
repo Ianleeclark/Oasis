@@ -1,11 +1,12 @@
 defmodule Oasis.Parser.Path do
   alias Oasis.Parser.Operation
 
-  @required_keys [:get, :put, :post, :delete, :patch, :head, :options, :trace, :parameters]
+  @required_keys [:uri, :get, :put, :post, :delete, :patch, :head, :options, :trace, :parameters]
   @enforce_keys @required_keys
   defstruct @required_keys
 
   @type t :: %__MODULE__{
+          uri: String.t(),
           get: Operation.t(),
           put: Operation.t(),
           post: Operation.t(),
@@ -18,6 +19,7 @@ defmodule Oasis.Parser.Path do
         }
 
   def new(
+        uri,
         get \\ nil,
         put \\ nil,
         post \\ nil,
@@ -27,22 +29,29 @@ defmodule Oasis.Parser.Path do
         options \\ nil,
         trace \\ nil,
         parameters \\ []
-      ) do
+      )
+      when is_binary(uri) do
     %__MODULE__{
-      get: get,
-      put: put,
-      post: post,
-      delete: delete,
-      patch: patch,
-      head: head,
-      options: options,
-      trace: trace,
-      parameters: parameters
+      uri: uri,
+      get: Operation.from_map(get),
+      put: Operation.from_map(put),
+      post: Operation.from_map(post),
+      delete: Operation.from_map(delete),
+      patch: Operation.from_map(patch),
+      head: Operation.from_map(head),
+      options: Operation.from_map(options),
+      trace: Operation.from_map(trace),
+      parameters: Operation.from_map(parameters)
     }
   end
 
-  def from_json(json) do
+  @doc """
+  Converts a map into a `t:Path.t()/0`
+  """
+  @spec from_map(uri :: String.t(), json :: %{String.t() => any()}) :: t()
+  def from_map(uri, json) when is_binary(uri) and is_map(json) do
     new(
+      uri,
       json["get"],
       json["put"],
       json["post"],
@@ -55,5 +64,9 @@ defmodule Oasis.Parser.Path do
     )
   end
 
+  @doc """
+  A helper method to easily list all expected HTTP methods.
+  """
+  @spec all_http_methods() :: [atom()]
   def all_http_methods, do: [:get, :put, :post, :delete, :patch, :head, :options, :trace]
 end

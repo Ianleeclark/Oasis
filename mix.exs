@@ -7,9 +7,12 @@ defmodule Oasis.MixProject do
       version: "0.1.0",
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
+
+  def aliases, do: []
 
   def application do
     [
@@ -22,8 +25,8 @@ defmodule Oasis.MixProject do
       # Core dependencies
       ## Json parsing.
       {:jason, "~> 1.1"},
-      ## Lenses to make working with nested data easier
-      {:focus, "~> 0.3.5"},
+      ## Does schema validation for requests
+      {:ecto, "~> 3.1.0"},
 
       # Developer dependencies
       ## Keep code complexity moderately low

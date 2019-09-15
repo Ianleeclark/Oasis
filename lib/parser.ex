@@ -7,78 +7,112 @@ defmodule Oasis.Parser do
   all that good stuff.
   """
 
-  alias Oasis.Parser.{Metadata, Operation, Path, Swagger}
+  alias Oasis.Parser.Metadata
+  alias Oasis.Parser.{Metadata, OAS, Operation, Path}
 
   @doc """
   This is a roll-up of the following functions. It maps operation_ids to metadata.
   """
   @spec load(raw_json :: binary()) :: %{(operation_id :: String.t()) => Metadata.t()}
   def load(raw_json) when is_binary(raw_json) do
-    raw_json
-    |> load_json()
-    |> map_json_to_swagger_struct()
-    |> extract_metadata_from_operations()
+    with {:ok, json_map} <- load_json(raw_json),
+         {:ok, %OAS{} = oas} <- map_json_to_oas_struct(json_map) do
+      extract_metadata_from_operations(oas)
+    end
   end
 
   @doc """
   Takes a raw blob of json and returns an elixir map.
   """
-  @spec load_json(raw_json :: binary()) :: map()
+  @spec load_json(raw_json :: binary()) :: {:ok, map()} | {:error, :invalid_json}
   def load_json(raw_json) when is_binary(raw_json) do
     raw_json
-    |> Jason.load!()
+    |> Jason.decode()
+    |> case do
+      {:ok, json_map} = retval when is_map(json_map) -> retval
+      {:error, _} -> {:error, :invalid_json}
+    end
   end
 
   # TODO(ian): Verify the type linking below actually works -- do I need /0
   @doc """
-  Takes an elixir map and converts it to a `t:Swagger.t/0`
+  Takes an elixir map and converts it to a `t:OAS.t/0`
 
   This allows easier metadata generation by pre-selecting all of the useful
   information into an easy-to-access structure.
   """
-  @spec map_json_to_swagger_struct(json_map :: map()) :: Swagger.t()
-  def map_json_to_swagger_struct(json_map) when is_map(json_map) do
-    path_lookup_table =
-      json_map["paths"]
-      |> Enum.into(%{}, fn {path, operation_data} ->
-        {path, Path.from_json(operation_data)}
-      end)
+  @spec map_json_to_oas_struct(json_map :: map()) :: {:ok, OAS.t()} | {:error, :invalid_api_spec}
+  def map_json_to_oas_struct(json_map) when is_map(json_map) do
+    case Map.has_key?(json_map, "paths") do
+      true ->
+        path_lookup_table =
+          json_map["paths"]
+          |> Enum.into(%{}, fn {path, operation_data} ->
+            {path, Path.from_map(path, operation_data)}
+          end)
 
-    Swagger.new(
-      json_map["version"],
-      json_map["security"],
-      path_lookup_table,
-      json_map["components"]
-    )
+        {:ok,
+         OAS.new(
+           json_map["version"],
+           json_map["security"],
+           path_lookup_table,
+           json_map["components"]
+         )}
+
+      false ->
+        {:error, :invalid_api_spec}
+    end
   end
 
   @doc """
-  Generates `t:Metadata.t/0` from the `t:Swagger.t/0` data.
+  Generates `t:Metadata.t()/0` from the `t:OAS.t()` data.
 
   These metadata entries will be used to generate functions to generate API calls.
   """
-  @spec extract_metadata_from_operations(swagger_data :: Swagger.t()) :: %{
-          (operation_id :: String.t()) => Metadata.t()
-        }
-  def extract_metadata_from_operations(%Swagger{paths: paths}) do
-    paths
-    |> Enum.into(%{}, fn %Path{} = path ->
-      Enum.into(%{}, Path.all_http_methods(), fn http_method ->
-        %Operation{} = operation = Map.get(path, http_method)
+  @spec extract_metadata_from_operations(oas_data :: OAS.t()) ::
+          {:ok,
+           %{
+             (operation_id :: String.t()) => Metadata.t()
+           }}
+  def extract_metadata_from_operations(%OAS{paths: paths}) when is_map(paths) do
+    retval =
+      paths
+      |> Enum.flat_map(fn {_operation_id, %Path{uri: uri} = top_level_path} ->
+        # We need to iterate over each and every key in the `Path.t()`, so we use the
+        # `all_http_methods` function to grab all keys (besides house-keeping stuff like `uri`)
+        Path.all_http_methods()
+        |> Enum.into(%{}, fn http_method ->
+          {http_method, Map.get(top_level_path, http_method)}
+        end)
+        |> Enum.map(fn
+          # See comments below, but we discard this info if there is nothing useful here.
+          {http_method, nil} ->
+            nil
 
-        metadata =
-          Metadata.new(
-            operation.request_body,
-            operation.requires_auth?,
-            operation.responses,
-            operation.parameters,
-            path,
-            http_method
-          )
+          {http_method, %Operation{} = operation} ->
+            metadata =
+              Metadata.new(
+                operation.request_body,
+                operation.requires_auth?,
+                operation.responses,
+                operation.parameters,
+                uri,
+                http_method
+              )
 
-        Map.new()
-        |> Map.put(operation.operation_id, metadata)
+            {operation.operation_id, metadata}
+        end)
+        # Get rid of any nil data. This basically means that, if there is no metadata about
+        # the endpoint, then there is no usable information, so no need to keep it around.
+        |> Enum.filter(fn x -> not is_nil(x) end)
+        # Put all of the {operation_id, metadata pairs} into one big map to make easy to
+        # look into
+        |> Enum.into(%{})
       end)
-    end)
+      # At this point, we'll have a single list (due to `flat_map`) of many different maps.
+      # These `operationIds` are guaranteed to be unique, so we can collapse into a single map.
+      |> Enum.into(%{})
+
+    {:ok, retval}
   end
 end
