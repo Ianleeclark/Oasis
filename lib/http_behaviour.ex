@@ -18,6 +18,6 @@ defmodule Oasis.HTTPBehaviour do
           reason: any()
         }
 
-  @callback delete(url, headers \\ [], opts \\ []) ::
+  @callback delete(url :: String.t(), headers :: list, opts :: list) ::
               {:ok, http_response()} | {:error, http_error()}
 end

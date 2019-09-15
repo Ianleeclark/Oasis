@@ -4,30 +4,56 @@ defmodule Oasis do
   """
 
   alias Oasis.Parser
+  alias Oasis.Parser.Metadata
 
-  @doc """
-  Hello world.
+  def create_x(filename) do
+    # TODO(ian): Can we use `defoverridable` to make these dynamically defined and swap out modules at runtime
+    {:ok, metadata_by_opids} =
+      filename
+      |> File.read!()
+      |> Jason.decode!()
+      |> Parser.load()
 
-  ## Examples
+    contents =
+      quote(
+        bind_quoted: [metadata_by_opids: metadata_by_opids |> Macro.escape()],
+        unquote: true
+      ) do
+        # TODO(ian): tighten up the retval
+        @spec _call(
+                uri :: String.t(),
+                http_method :: atom(),
+                data :: map() | nil,
+                headers :: list(),
+                opts :: list
+              ) :: any()
+        def _call(uri, http_method, data, headers, opts) do
+        end
 
-      iex> Oasis.hello()
-      :world
+        unquote do
+          Enum.map(metadata_by_opids, fn {opid, %Metadata{} = metadata} ->
+            create_function(opid, metadata)
+          end)
+        end
+      end
 
-  """
-  def hello do
-    :world
+    Module.create(Oasis.Endpoints, contents, __ENV__)
   end
 
-  @doc """
-  Loads a file from the specified location
-  """
-  @spec load_file(directory :: String.t()) :: binary()
-  def load_file(directory) when is_binary(directory) do
-  end
-
-  def test(directory) do
-    directory
-    |> load_file()
-    |> Parser.load()
+  def create_function(function_name, %Metadata{uri: uri, method: method}) do
+    quote do
+      @doc """
+      Auto-generated from Oasis.
+      """
+      # TODO(ian): Change the `any` response
+      @spec unquote(function_name |> String.to_atom())(
+              data :: map(),
+              headers :: list(),
+              opts :: list
+            ) :: any()
+      def unquote(function_name |> String.to_atom())(data \\ nil, headers \\ [], opts \\ []) do
+        _call(unquote(uri), unquote(method), data, headers, opts)
+      end
+    end
   end
 end
