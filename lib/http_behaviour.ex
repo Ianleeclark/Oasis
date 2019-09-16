@@ -20,4 +20,22 @@ defmodule Oasis.HTTPBehaviour do
 
   @callback delete(url :: String.t(), headers :: list, opts :: list) ::
               {:ok, http_response()} | {:error, http_error()}
+
+  @callback put(url :: String.t(), body :: String.t(), headers :: list, opts :: list) ::
+              {:ok, http_response()} | {:error, http_error()}
+
+  @callback post(url :: String.t(), body :: String.t(), headers :: list, opts :: list) ::
+              {:ok, http_response()} | {:error, http_error()}
+
+  @callback patch(url :: String.t(), body :: String.t(), headers :: list, opts :: list) ::
+              {:ok, http_response()} | {:error, http_error()}
+
+  @callback get(url :: String.t(), headers :: list, opts :: list) ::
+              {:ok, http_response()} | {:error, http_error()}
+
+  @callback head(url :: String.t(), headers :: list(), opts :: list()) ::
+              {:ok, http_response()} | {:error, http_error()}
+
+  @callback options(url :: String.t(), headers :: list(), opts :: list()) ::
+              {:ok, http_response()} | {:error, http_error()}
 end
