@@ -8,8 +8,8 @@ defmodule Oasis do
 
   @http Application.get_env(:oasis, :http_module)
 
-  # TODO(ian): Typespec
-  @spec register_endpoints_from_filename(filename :: Path.t()) :: Module.t()
+  @spec register_endpoints_from_filename(filename :: Path.t()) ::
+          {:module, module(), binary(), term()}
   def register_endpoints_from_filename(filename) do
     # TODO(ian): Can we use `defoverridable` to make these dynamically defined and swap out modules at runtime
     {:ok, metadata_by_opids} =
@@ -41,7 +41,15 @@ defmodule Oasis do
                 # TODO(ian): tighten up the retval
               ) :: any()
         defp call(uri, http_method, schema, data \\ nil, headers \\ [], opts \\ []) do
-          # TODO(ian): Figure out how to get function call working, maps don't work on modules
+          # Only a few of these need bodies.
+          args =
+            if Enum.member?([:put, :patch, :post], http_method) do
+              [uri, data, headers, opts]
+            else
+              [uri, headers, opts]
+            end
+
+          apply(@http_interface, http_method, args)
         end
 
         # Iterate through the metadata creating a function per `operation_id`
@@ -63,7 +71,6 @@ defmodule Oasis do
   call, we have this method hold onto that data, so the caller is only required to pass
   in `data`, `headers`, and `opts`, thus satisfying the `HTTPBehaviour`
   """
-  # TODO(ian): What is the return type for this?
   @spec create_function(function_name :: String.t(), Metadata.t()) :: any()
   defp create_function(function_name, %Metadata{uri: uri, method: method, schema: schema}) do
     quote do
