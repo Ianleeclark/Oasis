@@ -5,7 +5,7 @@ defmodule Oasis.Parser.Operation do
   See also: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operationObject
   """
 
-  import Oasis.Guards
+  import Oasis.Utils.Guards
 
   @required_keys [
     :operation_id,

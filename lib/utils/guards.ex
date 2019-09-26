@@ -1,4 +1,4 @@
-defmodule Oasis.Guards do
+defmodule Oasis.Utils.Guards do
   @moduledoc """
   Houses commonly used guards
   """

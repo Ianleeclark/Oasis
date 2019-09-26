@@ -146,8 +146,6 @@ defmodule Oasis.ParserTest do
       Enum.map(expected_keys, fn expected_key ->
         assert Map.has_key?(metadata, expected_key)
       end)
-
-      IO.inspect(Jason.encode(@test_spec))
     end
   end
 end
