@@ -1,4 +1,4 @@
-defmodule Oasis.HTTPBehaviour do
+defmodule Oasis.HTTPSpec do
   @moduledoc """
   This is the contract that any user of Oasis must adhere to.
 
@@ -18,24 +18,22 @@ defmodule Oasis.HTTPBehaviour do
           reason: any()
         }
 
-  @callback delete(url :: String.t(), headers :: list, opts :: list) ::
-              {:ok, http_response()} | {:error, http_error()}
+  @type response :: {:ok, http_response()} | {:error, http_error()}
+
+  @callback delete(url :: String.t(), headers :: list, opts :: list) :: response()
 
   @callback put(url :: String.t(), body :: String.t(), headers :: list, opts :: list) ::
-              {:ok, http_response()} | {:error, http_error()}
+              response()
 
   @callback post(url :: String.t(), body :: String.t(), headers :: list, opts :: list) ::
-              {:ok, http_response()} | {:error, http_error()}
+              response()
 
   @callback patch(url :: String.t(), body :: String.t(), headers :: list, opts :: list) ::
-              {:ok, http_response()} | {:error, http_error()}
+              response()
 
-  @callback get(url :: String.t(), headers :: list, opts :: list) ::
-              {:ok, http_response()} | {:error, http_error()}
+  @callback get(url :: String.t(), headers :: list, opts :: list) :: response()
 
-  @callback head(url :: String.t(), headers :: list(), opts :: list()) ::
-              {:ok, http_response()} | {:error, http_error()}
+  @callback head(url :: String.t(), headers :: list(), opts :: list()) :: response()
 
-  @callback options(url :: String.t(), headers :: list(), opts :: list()) ::
-              {:ok, http_response()} | {:error, http_error()}
+  @callback options(url :: String.t(), headers :: list(), opts :: list()) :: response()
 end

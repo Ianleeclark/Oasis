@@ -35,7 +35,7 @@ defmodule OasisTest do
       users_delete = Oasis.Endpoints.users_delete()
 
       [sub_post, sub_put, users_post, users_put]
-      |> Enum.map(fn {retval, {uri, body, headers, opts}} ->
+      |> Enum.map(fn {retval, {_uri, body, headers, opts}} ->
         assert retval == :ok
         assert body == %{foo: 'bar'}
         assert headers == {'Content-Type', 'application/json'}
@@ -43,7 +43,7 @@ defmodule OasisTest do
       end)
 
       [sub_delete, users_delete]
-      |> Enum.map(fn {retval, {uri, headers, opts}} ->
+      |> Enum.map(fn {retval, {_uri, headers, opts}} ->
         assert retval == :ok
         assert headers == []
         assert opts == []

@@ -3,6 +3,7 @@ defmodule Oasis do
   Documentation for Oasis.
   """
 
+  alias Oasis.HTTPSpec
   alias Oasis.Parser
   alias Oasis.Parser.Metadata
 
@@ -11,7 +12,7 @@ defmodule Oasis do
   @spec register_endpoints_from_filename(filename :: Path.t()) ::
           {:module, module(), binary(), term()}
   def register_endpoints_from_filename(filename) do
-    # TODO(ian): Can we use `defoverridable` to make these dynamically defined and swap out modules at runtime
+    # NOTE(ian): Can we use `defoverridable` to make these dynamically defined and swap out modules at runtime
     {:ok, metadata_by_opids} =
       filename
       |> File.read!()
@@ -38,8 +39,7 @@ defmodule Oasis do
                 data :: map() | nil,
                 headers :: list(),
                 opts :: list()
-                # TODO(ian): tighten up the retval
-              ) :: any()
+              ) :: HTTPSpec.response()
         defp call(uri, http_method, schema, data \\ nil, headers \\ [], opts \\ []) do
           # Only a few of these need bodies.
           args =
@@ -69,7 +69,7 @@ defmodule Oasis do
   These are intermediary functions that hold metadata for the `call/6` method. Instead
   of having the caller need to pass in the http method, the URI, and the schema per
   call, we have this method hold onto that data, so the caller is only required to pass
-  in `data`, `headers`, and `opts`, thus satisfying the `HTTPBehaviour`
+  in `data`, `headers`, and `opts`, thus satisfying the `HTTPSpec`
   """
   @spec create_function(function_name :: String.t(), Metadata.t()) :: any()
   defp create_function(function_name, %Metadata{uri: uri, method: method, schema: schema}) do
@@ -77,17 +77,16 @@ defmodule Oasis do
       @doc """
       Auto-generated from Oasis.
       """
-      # TODO(ian): Change the `any` response
       @spec unquote(function_name |> String.to_atom())(
               data :: map(),
               headers :: list(),
               opts :: list
-            ) :: any()
+            ) :: HTTPSpec.response()
       def unquote(function_name |> String.to_atom())(data \\ nil, headers \\ [], opts \\ []) do
         call(
           unquote(uri),
           unquote(method),
-          # TODO(ian): The macro.escape may not be necessary when this is an ecto schema
+          # NOTE: The macro.escape may not be necessary when this is an ecto schema
           unquote(schema |> Macro.escape()),
           data,
           headers,

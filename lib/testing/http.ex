@@ -1,7 +1,7 @@
 defmodule Oasis.Testing.HTTP do
   @moduledoc false
 
-  @behaviour Oasis.HTTPBehaviour
+  @behaviour Oasis.HTTPSpec
 
   def get(url, headers \\ [], opts \\ []) do
     {:ok, {url, headers, opts}}
