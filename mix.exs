@@ -7,6 +7,7 @@ defmodule Oasis.MixProject do
       version: "0.1.0",
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: ExCoveralls],
       deps: deps(),
       aliases: aliases(),
       elixirc_options: [warnings_as_errors: true]
@@ -39,7 +40,9 @@ defmodule Oasis.MixProject do
       ## Documentation + Deployments
       {:ex_doc, "~> 0.21", only: [:dev, :test], runtime: false},
       ## Used for testing the HTTP behavior and during testing
-      {:httpoison, "~> 1.5.1", only: [:dev, :test]}
+      {:httpoison, "~> 1.5.1", only: [:dev, :test]},
+      ## Shows coverage % for tests
+      {:excoveralls, "~> 0.10", only: :test}
     ]
   end
 end

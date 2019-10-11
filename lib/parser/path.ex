@@ -24,6 +24,18 @@ defmodule Oasis.Parser.Path do
           parameters: [map()]
         }
 
+  @spec new(
+          uri :: String.t(),
+          get :: Operation.t(),
+          put :: Operation.t(),
+          post :: Operation.t(),
+          delete :: Operation.t(),
+          patch :: Operation.t(),
+          head :: Operation.t(),
+          options :: Operation.t(),
+          trace :: Operation.t(),
+          parameters :: [map()]
+        ) :: t()
   def new(
         uri,
         get \\ nil,
@@ -47,7 +59,7 @@ defmodule Oasis.Parser.Path do
       head: Operation.from_map(head),
       options: Operation.from_map(options),
       trace: Operation.from_map(trace),
-      parameters: Operation.from_map(parameters)
+      parameters: parameters
     }
   end
 
@@ -58,15 +70,15 @@ defmodule Oasis.Parser.Path do
   def from_map(uri, json) when is_binary(uri) and is_map(json) do
     new(
       uri,
-      json["get"],
-      json["put"],
-      json["post"],
-      json["delete"],
-      json["patch"],
-      json["head"],
-      json["options"],
-      json["trace"],
-      json["parameters"]
+      Map.get(json, "get"),
+      Map.get(json, "put"),
+      Map.get(json, "post"),
+      Map.get(json, "delete"),
+      Map.get(json, "patch"),
+      Map.get(json, "head"),
+      Map.get(json, "options"),
+      Map.get(json, "trace"),
+      Map.get(json, "parameters")
     )
   end
 

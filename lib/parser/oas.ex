@@ -16,6 +16,7 @@ defmodule Oasis.Parser.OAS do
           components: map()
         }
 
+  @spec new(version :: String.t(), security :: map(), paths :: map(), components :: map()) :: t()
   def new(version, security, paths, components)
       when is_binary(version) and is_map(security) and is_map(paths) and is_map(components) do
     %__MODULE__{

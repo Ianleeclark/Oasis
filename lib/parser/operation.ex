@@ -7,6 +7,8 @@ defmodule Oasis.Parser.Operation do
 
   import Oasis.Utils.Guards
 
+  alias Oasis.Parser.{Reference, RequestBody}
+
   @required_keys [
     :operation_id,
     :parameters,
@@ -23,18 +25,26 @@ defmodule Oasis.Parser.Operation do
   @type t :: %__MODULE__{
           operation_id: String.t(),
           parameters: map(),
-          request_body: map() | nil,
-          responses: [integer()],
+          request_body: Reference.t() | RequestBody.t() | nil,
+          responses: [pos_integer()],
           callbacks: [any()],
           deprecated: boolean(),
           security: map(),
           requires_auth?: boolean()
         }
 
+  @spec new(
+          operation_id :: String.t(),
+          parameters :: map(),
+          request_body :: map(),
+          responses :: %{String.t() => any()},
+          callbacks :: [any()],
+          deprecated :: bool,
+          security :: map()
+        ) :: t()
   def new(operation_id, parameters, request_body, responses, callbacks, deprecated, security)
-      when is_binary(operation_id) and is_map(parameters) and is_maybe_map(request_body) and
-             is_map(responses) and is_list(callbacks) and is_boolean(deprecated) and
-             is_map(security) do
+      when is_binary(operation_id) and is_map(parameters) and is_map(responses) and
+             is_list(callbacks) and is_boolean(deprecated) and is_map(security) do
     %__MODULE__{
       operation_id: operation_id,
       parameters: parameters,
