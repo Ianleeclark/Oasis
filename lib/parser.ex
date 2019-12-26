@@ -85,7 +85,7 @@ defmodule Oasis.Parser do
         end)
         |> Enum.map(fn
           # See comments below, but we discard this info if there is nothing useful here.
-          {http_method, nil} ->
+          {_http_method, nil} ->
             nil
 
           {http_method, %Operation{} = operation} ->

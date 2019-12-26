@@ -63,14 +63,14 @@ defmodule Oasis do
     Module.create(Oasis.Endpoints, contents, __ENV__)
   end
 
-  @doc """
-  Creates an injectable function to be added to the `Oasis.Endpoints` module.
-
-  These are intermediary functions that hold metadata for the `call/6` method. Instead
-  of having the caller need to pass in the http method, the URI, and the schema per
-  call, we have this method hold onto that data, so the caller is only required to pass
-  in `data`, `headers`, and `opts`, thus satisfying the `HTTPSpec`
-  """
+  #########################################################################################
+  # Creates an injectable function to be added to the `Oasis.Endpoints` module.           #
+  #                                                                                       #
+  # These are intermediary functions that hold metadata for the `call/6` method. Instead  #
+  # of having the caller need to pass in the http method, the URI, and the schema per     #
+  # call, we have this method hold onto that data, so the caller is only required to pass #
+  # in `data`, `headers`, and `opts`, thus satisfying the `HTTPSpec`                      #
+  #########################################################################################
   @spec create_function(function_name :: String.t(), Metadata.t()) :: any()
   defp create_function(function_name, %Metadata{uri: uri, method: method, schema: schema}) do
     quote do
