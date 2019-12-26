@@ -34,7 +34,6 @@ defmodule Oasis.Parser do
     end
   end
 
-  # TODO(ian): Verify the type linking below actually works -- do I need /0
   @doc """
   Takes an elixir map and converts it to a `t:OAS.t/0`
 
