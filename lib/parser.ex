@@ -34,7 +34,6 @@ defmodule Oasis.Parser do
     end
   end
 
-  # TODO(ian): Verify the type linking below actually works -- do I need /0
   @doc """
   Takes an elixir map and converts it to a `t:OAS.t/0`
 
@@ -86,7 +85,7 @@ defmodule Oasis.Parser do
         end)
         |> Enum.map(fn
           # See comments below, but we discard this info if there is nothing useful here.
-          {http_method, nil} ->
+          {_http_method, nil} ->
             nil
 
           {http_method, %Operation{} = operation} ->

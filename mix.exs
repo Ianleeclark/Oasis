@@ -8,7 +8,8 @@ defmodule Oasis.MixProject do
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      elixirc_options: [warnings_as_errors: true]
     ]
   end
 
@@ -36,7 +37,7 @@ defmodule Oasis.MixProject do
       ## Property testing
       {:stream_data, "~> 0.1", only: :test},
       ## Documentation + Deployments
-      {:ex_doc, "~> 0.14", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.21", only: [:dev, :test], runtime: false},
       ## Used for testing the HTTP behavior and during testing
       {:httpoison, "~> 1.5.1", only: [:dev, :test]}
     ]

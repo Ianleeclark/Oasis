@@ -1,4 +1,6 @@
 defmodule Oasis.Parser.Metadata do
+  @moduledoc false
+
   @required_keys [:schema, :requires_auth, :response_status_codes, :uri_params, :uri, :method]
   @enforce_keys @required_keys
   defstruct @required_keys

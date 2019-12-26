@@ -1,4 +1,10 @@
 defmodule Oasis.Parser.Path do
+  @moduledoc """
+  Represents a Path from OAS 3.0
+
+  See also: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#pathItemObject
+  """
+
   alias Oasis.Parser.Operation
 
   @required_keys [:uri, :get, :put, :post, :delete, :patch, :head, :options, :trace, :parameters]
