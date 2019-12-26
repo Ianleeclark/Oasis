@@ -9,7 +9,7 @@ defmodule Oasis.Schemas do
   @spec create_ecto_schema(Operation.t()) :: {:ok, any()}
   def create_ecto_schema(%Operation{request_body: nil}), do: {:ok, nil}
 
-  def create_ecto_schema(%Operation{request_body: request_body} = operation) do
+  def create_ecto_schema(%Operation{} = operation) do
     # TODO(ian): We can reload these schemas with `Metadata.put_meta/2`
     quote(unquote: true) do
       use Ecto.Schema, as: EctoSchema
@@ -29,7 +29,7 @@ defmodule Oasis.Schemas do
   defp build_schema_fields(%Operation{request_body: nil}) do
   end
 
-  defp build_schema_fields(%Operation{request_body: %Reference{} = request_body}) do
+  defp build_schema_fields(%Operation{request_body: %Reference{}}) do
   end
 
   defp build_schema_fields(%Operation{request_body: %RequestBody{content: content} = request_body})
@@ -41,7 +41,7 @@ defmodule Oasis.Schemas do
       nil ->
         {:error, :no_json_schema_found}
 
-      %MediaType{schema: %Schema{} = schema} = media_type ->
+      %MediaType{schema: %Schema{} = schema} ->
         # TODO(ian): Handle arrays
         # TODO(ian): Handle no properties 
         # TODO(ian): Handle references
