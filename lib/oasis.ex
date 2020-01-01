@@ -16,7 +16,6 @@ defmodule Oasis do
     {:ok, metadata_by_opids} =
       filename
       |> File.read!()
-      |> Jason.decode!()
       |> Parser.load()
 
     # Contents are the AST of the module. There are two things of note here:
