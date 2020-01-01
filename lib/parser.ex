@@ -29,8 +29,14 @@ defmodule Oasis.Parser do
     raw_json
     |> Jason.decode()
     |> case do
-      {:ok, json_map} = retval when is_map(json_map) -> retval
-      {:error, _} -> {:error, :invalid_json}
+      {:ok, json_string} when is_binary(json_string) ->
+        {:ok, Jason.decode!(json_string)}
+
+      {:ok, json_map} = retval when is_map(json_map) ->
+        retval
+
+      {:error, _} ->
+        {:error, :invalid_json}
     end
   end
 
@@ -84,6 +90,10 @@ defmodule Oasis.Parser do
           {http_method, Map.get(top_level_path, http_method)}
         end)
         |> Enum.map(fn
+          {_http_method, {:error, _error_reason}} ->
+            # TODO(ian): Debug warning if this is hit?
+            nil
+
           # See comments below, but we discard this info if there is nothing useful here.
           {_http_method, nil} ->
             nil

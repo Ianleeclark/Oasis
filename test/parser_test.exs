@@ -10,37 +10,37 @@ defmodule Oasis.ParserTest do
       "/payments/subscriptions" => %{
         "post" => %{
           "operationId" => "subscriptions_post",
-          "parameters" => %{},
+          "parameters" => [%{"foo" => "bar"}],
           "requestBody" => %{"$ref" => "#!/components/schemas/NewSubscription"},
           "responses" => %{
             "200" => %{},
             "400" => %{}
           },
-          "callbacks" => [],
+          "callbacks" => %{},
           "deprecated" => true,
           "security" => %{}
         },
         "put" => %{
           "operationId" => "subscriptions_put",
-          "parameters" => %{},
+          "parameters" => [%{}],
           "requestBody" => nil,
           "responses" => %{
             "200" => %{},
             "400" => %{}
           },
-          "callbacks" => [],
+          "callbacks" => %{},
           "deprecated" => true,
           "security" => %{}
         },
         "delete" => %{
           "operationId" => "subscriptions_delete",
-          "parameters" => %{},
+          "parameters" => [%{}],
           "requestBody" => nil,
           "responses" => %{
             "200" => %{},
             "400" => %{}
           },
-          "callbacks" => [],
+          "callbacks" => %{},
           "deprecated" => true,
           "security" => %{}
         }
@@ -48,37 +48,37 @@ defmodule Oasis.ParserTest do
       "/users" => %{
         "post" => %{
           "operationId" => "users_post",
-          "parameters" => %{},
+          "parameters" => [%{}],
           "requestBody" => %{"$ref" => "#!/components/schemas/NewUser"},
           "responses" => %{
             "200" => %{},
             "400" => %{}
           },
-          "callbacks" => [],
-          "deprecated" => true,
+          "callbacks" => %{},
+          "deprecated" => false,
           "security" => %{}
         },
         "put" => %{
           "operationId" => "users_put",
-          "parameters" => %{},
+          "parameters" => [%{}],
           "requestBody" => nil,
           "responses" => %{
             "200" => %{},
             "400" => %{}
           },
-          "callbacks" => [],
+          "callbacks" => %{},
           "deprecated" => true,
           "security" => %{}
         },
         "delete" => %{
           "operationId" => "users_delete",
-          "parameters" => %{},
+          "parameters" => [%{}],
           "requestBody" => nil,
           "responses" => %{
             "200" => %{},
             "400" => %{}
           },
-          "callbacks" => [],
+          "callbacks" => %{},
           "deprecated" => true,
           "security" => %{}
         }

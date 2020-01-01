@@ -19,10 +19,10 @@ defmodule Oasis.SchemasTest do
     operation =
       Operation.new(
         "test_operation_id",
-        %{},
+        [%{foo: "bar"}],
         request_body,
+        %{"200" => %{}, "404" => %{}, "default" => %{}},
         %{},
-        [],
         true,
         %{}
       )

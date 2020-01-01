@@ -5,6 +5,7 @@ defmodule Oasis.Parser.Operation do
   See also: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operationObject
   """
 
+  import Oasis.Utils.Guards
   alias Oasis.Parser.{Reference, RequestBody}
 
   @required_keys [
@@ -13,7 +14,7 @@ defmodule Oasis.Parser.Operation do
     :request_body,
     :responses,
     :callbacks,
-    :deprecated,
+    :deprecated?,
     :security,
     :requires_auth?
   ]
@@ -22,34 +23,57 @@ defmodule Oasis.Parser.Operation do
 
   @type t :: %__MODULE__{
           operation_id: String.t(),
-          parameters: map(),
+          parameters: [map()],
           request_body: Reference.t() | RequestBody.t() | nil,
-          responses: [pos_integer()],
-          callbacks: [any()],
-          deprecated: boolean(),
+          responses: [String.t()],
+          callbacks: map() | nil,
+          deprecated?: boolean(),
           security: map(),
           requires_auth?: boolean()
         }
 
   @spec new(
           operation_id :: String.t(),
-          parameters :: map(),
+          parameters :: [map()],
           request_body :: map(),
           responses :: %{String.t() => any()},
-          callbacks :: [any()],
-          deprecated :: bool,
+          callbacks :: map() | nil,
+          deprecated? :: bool,
           security :: map()
-        ) :: t()
-  def new(operation_id, parameters, request_body, responses, callbacks, deprecated, security)
-      when is_binary(operation_id) and is_map(parameters) and is_map(responses) and
-             is_list(callbacks) and is_boolean(deprecated) and is_map(security) do
+        ) :: t() | {:error, :endpoint_missing_operation_id}
+  def new(
+        operation_id,
+        parameters,
+        request_body,
+        responses,
+        callbacks \\ [],
+        deprecated? \\ false,
+        security \\ %{}
+      )
+
+  # The library relies on an `operation_id` to generate a name to tie the HTTP request to. If one isn't provided, we'll discard it and issue a warning to the caller.
+  def new(operation_id, _a, _b, _c, _d, _e, _f) when is_nil(operation_id) do
+    {:error, :endpoint_missing_operation_id}
+  end
+
+  def new(
+        operation_id,
+        parameters,
+        request_body,
+        responses,
+        callbacks,
+        deprecated?,
+        security
+      )
+      when is_binary(operation_id) and is_maybe_list(parameters) and is_map(responses) and
+             is_maybe_map(callbacks) and is_maybe_boolean(deprecated?) and is_maybe_map(security) do
     %__MODULE__{
       operation_id: operation_id,
       parameters: parameters,
       request_body: request_body,
-      responses: Enum.map(Map.keys(responses), &String.to_integer/1),
+      responses: Map.keys(responses),
       callbacks: callbacks,
-      deprecated: deprecated,
+      deprecated?: deprecated?,
       security: security,
       requires_auth?: requires_auth?(security)
     }
@@ -59,6 +83,7 @@ defmodule Oasis.Parser.Operation do
   Helper method to determine if the endpoint requires authentication or not
   """
   @spec requires_auth?(security :: map()) :: boolean()
+  def requires_auth?(nil), do: false
   def requires_auth?(security) when is_map(security), do: Map.equal?(%{}, security)
 
   @doc """

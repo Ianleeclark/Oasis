@@ -5,10 +5,10 @@ defmodule Oasis.Parser.PathTest do
 
   @operation_values %{
     "operationId" => "test_operation_id",
-    "parameters" => %{},
+    "parameters" => [],
     "requestBody" => %{},
-    "responses" => %{},
-    "callbacks" => [],
+    "responses" => %{"200" => %{}, "404" => %{}, "default" => %{}},
+    "callbacks" => %{},
     "deprecated" => false,
     "security" => %{}
   }
@@ -30,12 +30,12 @@ defmodule Oasis.Parser.PathTest do
             "post" => @operation_values,
             "delete" => @operation_values,
             "patch" => @operation_values,
-            "parameters" => ["asdf"]
+            "parameters" => []
           }
         )
 
       assert path.uri == "/v1/users"
-      assert path.parameters == ["asdf"]
+      assert path.parameters == []
 
       assert is_nil(path.head)
       assert is_nil(path.options)
@@ -46,11 +46,11 @@ defmodule Oasis.Parser.PathTest do
         refute is_nil(x)
 
         assert x.operation_id == "test_operation_id"
-        assert x.parameters == %{}
+        assert x.parameters == []
         assert x.request_body == %{}
-        assert x.responses == []
-        assert x.callbacks == []
-        assert x.deprecated == false
+        assert x.responses == ["200", "404", "default"]
+        assert x.callbacks == %{}
+        assert x.deprecated? == false
         assert x.security == %{}
       end)
     end
