@@ -5,6 +5,7 @@ defmodule Oasis.Parser.Operation do
   See also: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operationObject
   """
 
+  import Oasis.Utils.Guards
   alias Oasis.Parser.{Reference, RequestBody}
 
   @required_keys [
@@ -34,20 +35,47 @@ defmodule Oasis.Parser.Operation do
   @spec new(
           operation_id :: String.t(),
           parameters :: map(),
-          request_body :: map(),
+          request_body :: RequestBody.t() | map(),
           responses :: %{String.t() => any()},
           callbacks :: [any()],
           deprecated :: bool,
           security :: map()
         ) :: t()
-  def new(operation_id, parameters, request_body, responses, callbacks, deprecated, security)
+
+  # a RequestBody `request_body`
+  def new(
+        operation_id,
+        parameters,
+        %RequestBody{} = request_body,
+        responses,
+        callbacks,
+        deprecated,
+        security
+      )
       when is_binary(operation_id) and is_map(parameters) and is_map(responses) and
              is_list(callbacks) and is_boolean(deprecated) and is_map(security) do
     %__MODULE__{
       operation_id: operation_id,
       parameters: parameters,
       request_body: request_body,
-      responses: Enum.map(Map.keys(responses), &String.to_integer/1),
+      responses: Map.keys(responses),
+      callbacks: callbacks,
+      deprecated: deprecated,
+      security: security,
+      requires_auth?: requires_auth?(security)
+    }
+  end
+
+  # This has a map `request_body`
+  def new(operation_id, parameters, request_body, responses, callbacks, deprecated, security)
+      when is_binary(operation_id) and is_map(parameters) and is_maybe_map(request_body) and
+             is_map(responses) and is_list(callbacks) and is_boolean(deprecated) and
+             is_map(security) do
+    %__MODULE__{
+      operation_id: operation_id,
+      parameters: parameters,
+      request_body: RequestBody.from_map(request_body),
+      responses: Map.keys(responses),
       callbacks: callbacks,
       deprecated: deprecated,
       security: security,

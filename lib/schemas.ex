@@ -32,8 +32,7 @@ defmodule Oasis.Schemas do
   defp build_schema_fields(%Operation{request_body: %Reference{}}) do
   end
 
-  defp build_schema_fields(%Operation{request_body: %RequestBody{content: content} = request_body})
-       when is_map(request_body) do
+  defp build_schema_fields(%Operation{request_body: %RequestBody{content: content}}) do
     # TODO(ian): Remove the hard-coded value, but only support json in the future.
     request_media = Map.get(content, "application/json")
 

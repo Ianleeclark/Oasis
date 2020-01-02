@@ -161,7 +161,7 @@ defmodule Oasis.Parser.Schema do
   Converts a json map into a `Schema.t()` 
   """
   @spec from_map(map()) :: t()
-  def from_map(%{} = input) do
+  def from_map(input) when is_map(input) do
     new(
       input["type"] |> type_from_string(),
       Map.get(input, "format") |> format_from_string(),

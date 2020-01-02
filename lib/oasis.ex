@@ -49,7 +49,19 @@ defmodule Oasis do
               [uri, headers, opts]
             end
 
-          apply(@http_interface, http_method, args)
+          case schema do
+            nil ->
+              apply(@http_interface, http_method, args)
+
+            _ ->
+              case Ecto.Changeset.cast(schema, data, []) do
+                true ->
+                  apply(@http_interface, http_method, args)
+
+                false ->
+                  {:error, :invalid_data}
+              end
+          end
         end
 
         # Iterate through the metadata creating a function per `operation_id`
