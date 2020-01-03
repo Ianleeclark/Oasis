@@ -91,7 +91,7 @@ defmodule Oasis.Parser.Operation do
       request_body: RequestBody.from_map(request_body),
       responses: Map.keys(responses),
       callbacks: callbacks,
-      deprecated?: deprecated? || false,
+      deprecated?: deprecated?,
       security: security || %{},
       requires_auth?: requires_auth?(security)
     }
