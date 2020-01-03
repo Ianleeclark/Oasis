@@ -99,9 +99,11 @@ defmodule Oasis.Parser do
             nil
 
           {http_method, %Operation{} = operation} ->
+            alias Oasis.Schemas
+
             metadata =
               Metadata.new(
-                operation.request_body,
+                Schemas.create_ecto_schema(operation),
                 operation.requires_auth?,
                 operation.responses,
                 operation.parameters,

@@ -22,7 +22,26 @@ defmodule Oasis.Parser.RequestBody do
           content :: %{String.t() => MediaType.t()},
           required? :: boolean()
         ) :: t()
-  def new(description, content, required?) when is_boolean(required?) do
+  def new(description, content, required?) when is_boolean(required?) and is_map(content) do
     %__MODULE__{description: description, content: content, required?: required?}
+  end
+
+  @spec from_map(request_body :: map() | nil) :: t()
+  def from_map(nil), do: nil
+
+  def from_map(request_body) when is_map(request_body) do
+    content_by_content_type = Map.get(request_body, "content", %{})
+
+    content =
+      content_by_content_type
+      |> Enum.into(%{}, fn {content_type, body} ->
+        {content_type, MediaType.from_map(body)}
+      end)
+
+    new(
+      Map.get(request_body, "description"),
+      content,
+      Map.get(request_body, "required", false)
+    )
   end
 end

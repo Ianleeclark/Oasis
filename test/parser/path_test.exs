@@ -1,7 +1,7 @@
 defmodule Oasis.Parser.PathTest do
   use ExUnit.Case
 
-  alias Oasis.Parser.Path
+  alias Oasis.Parser.{Path, RequestBody}
 
   @operation_values %{
     "operationId" => "test_operation_id",
@@ -47,7 +47,7 @@ defmodule Oasis.Parser.PathTest do
 
         assert x.operation_id == "test_operation_id"
         assert x.parameters == []
-        assert x.request_body == %{}
+        assert x.request_body == %RequestBody{content: %{}, description: nil, required?: false}
         assert x.responses == ["200", "404", "default"]
         assert x.callbacks == %{}
         assert x.deprecated? == false

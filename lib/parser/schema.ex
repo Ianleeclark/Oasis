@@ -161,34 +161,39 @@ defmodule Oasis.Parser.Schema do
   Converts a json map into a `Schema.t()` 
   """
   @spec from_map(map()) :: t()
-  def from_map(%{} = input) do
-    new(
-      input["type"] |> type_from_string(),
-      Map.get(input, "format") |> format_from_string(),
-      Map.get(input, "maximum"),
-      Map.get(input, "exclusiveMaximum"),
-      Map.get(input, "minimum"),
-      Map.get(input, "exclusiveMinimum"),
-      Map.get(input, "maxLength"),
-      Map.get(input, "minLength"),
-      Map.get(input, "pattern"),
-      Map.get(input, "maxItems"),
-      Map.get(input, "minItems"),
-      Map.get(input, "uniqueIems"),
-      Map.get(input, "maxProperties"),
-      Map.get(input, "minProperties"),
-      Map.get(input, "required"),
-      Map.get(input, "enum"),
-      Map.get(input, "allOf"),
-      Map.get(input, "oneOf"),
-      Map.get(input, "anyOf"),
-      Map.get(input, "isNot"),
-      Map.get(input, "items"),
-      Map.get(input, "properties"),
-      Map.get(input, "additionalProperties"),
-      Map.get(input, "default"),
-      Map.get(input, "nullable")
-    )
+  def from_map(input) when is_map(input) do
+    # TODO(ian): Remove whenever references are handled
+    if input["type"] == nil do
+      new(:reference)
+    else
+      new(
+        input["type"] |> type_from_string(),
+        Map.get(input, "format") |> format_from_string(),
+        Map.get(input, "maximum"),
+        Map.get(input, "exclusiveMaximum"),
+        Map.get(input, "minimum"),
+        Map.get(input, "exclusiveMinimum"),
+        Map.get(input, "maxLength"),
+        Map.get(input, "minLength"),
+        Map.get(input, "pattern"),
+        Map.get(input, "maxItems"),
+        Map.get(input, "minItems"),
+        Map.get(input, "uniqueIems"),
+        Map.get(input, "maxProperties"),
+        Map.get(input, "minProperties"),
+        Map.get(input, "required"),
+        Map.get(input, "enum"),
+        Map.get(input, "allOf"),
+        Map.get(input, "oneOf"),
+        Map.get(input, "anyOf"),
+        Map.get(input, "isNot"),
+        Map.get(input, "items"),
+        Map.get(input, "properties"),
+        Map.get(input, "additionalProperties"),
+        Map.get(input, "default"),
+        Map.get(input, "nullable")
+      )
+    end
   end
 
   @doc """

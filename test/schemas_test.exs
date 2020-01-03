@@ -13,8 +13,9 @@ defmodule Oasis.SchemasTest do
       }
     }
 
-    request_body =
-      RequestBody.new("Foobar", %{"application/json" => MediaType.new(schema, "encoding")}, false)
+    media_type = MediaType.new(schema, "encoding")
+
+    request_body = RequestBody.new("Foobar", %{"application/json" => media_type}, false)
 
     operation =
       Operation.new(
@@ -47,6 +48,7 @@ defmodule Oasis.SchemasTest do
       Schemas.create_ecto_schema(operation)
 
       assert Enum.member?(Oasis.Schemas.TestOperationId.__schema__(:fields), :test_field)
+      assert Enum.member?(Oasis.Schemas.TestOperationId.__schema__(:fields), :string_field)
       assert Oasis.Schemas.TestOperationId.__schema__(:type, :test_field) == :boolean
       assert Oasis.Schemas.TestOperationId.__schema__(:type, :string_field) == :date
     end
