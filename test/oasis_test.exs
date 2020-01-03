@@ -8,7 +8,6 @@ defmodule OasisTest do
       |> Path.join("*.json")
       |> Path.wildcard()
       |> Enum.map(fn file_name ->
-        IO.inspect(file_name)
         Oasis.register_endpoints_from_filename(file_name)
       end)
     end
