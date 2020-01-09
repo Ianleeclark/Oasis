@@ -27,18 +27,18 @@ defmodule Oasis.Schemas.Repo do
   @doc """
   Easy-to-consume function to store schemas. Prefer this above GenServer calls.
   """
-  @spec store_schema_by_name(pid :: pid(), name :: String.t(), schema :: map()) :: map()
-  def store_schema_by_name(pid, name, schema)
-      when is_pid(pid) and is_binary(name) and is_map(schema) do
-    GenServer.call(pid, {:store_schema, name, schema})
+  @spec store_schema_by_name(name :: String.t(), schema :: map()) :: map()
+  def store_schema_by_name(name, schema)
+      when is_binary(name) and is_map(schema) do
+    GenServer.call(Process.whereis(Oasis.Schemas.Repo), {:store_schema, name, schema})
   end
 
   @doc """
   Easy-to-consume function to retrieve schemas. Prefer this above GenServer calls.
   """
-  @spec fetch_schema_by_name(pid :: pid(), name :: String.t()) :: {:ok, map()}
-  def fetch_schema_by_name(pid, name) when is_pid(pid) and is_binary(name) do
-    GenServer.call(pid, {:fetch_schema, name})
+  @spec fetch_schema_by_name(name :: String.t()) :: {:ok, map()}
+  def fetch_schema_by_name(name) when is_binary(name) do
+    GenServer.call(Process.whereis(Oasis.Schemas.Repo), {:fetch_schema, name})
   end
 
   #################
