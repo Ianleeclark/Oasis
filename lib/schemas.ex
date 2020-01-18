@@ -40,6 +40,7 @@ defmodule Oasis.Schemas do
       nil ->
         {:error, :no_json_schema_found}
 
+      # TODO(ian): Add support here
       %MediaType{schema: %Schema{type: :reference}} ->
         {:error, :references_not_supported}
 
