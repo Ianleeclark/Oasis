@@ -58,6 +58,8 @@ defmodule Oasis.Parser do
     end
   end
 
+  defp preload_schemas_into_repo(_), do: :ok
+
   @doc """
   Takes a raw blob of json and returns an elixir map.
   """
