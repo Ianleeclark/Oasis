@@ -6,6 +6,7 @@ defmodule Oasis.Parser.Schema do
   """
 
   import Oasis.Utils.Guards
+  alias Oasis.Schemas.Repo
 
   @required_keys [:type]
   @optional_keys [
@@ -170,37 +171,51 @@ defmodule Oasis.Parser.Schema do
     required_properties = inject_required_keys(properties, required_keys)
     updated_schema = Map.put(schema, "properties", required_properties)
 
-    if schema["$ref"] != nil do
-      new(:reference)
-    else
-      new(
-        updated_schema["type"] |> type_from_string(),
-        Map.get(updated_schema, "format") |> format_from_string(),
-        Map.get(updated_schema, "maximum"),
-        Map.get(updated_schema, "exclusiveMaximum"),
-        Map.get(updated_schema, "minimum"),
-        Map.get(updated_schema, "exclusiveMinimum"),
-        Map.get(updated_schema, "maxLength"),
-        Map.get(updated_schema, "minLength"),
-        Map.get(updated_schema, "pattern"),
-        Map.get(updated_schema, "maxItems"),
-        Map.get(updated_schema, "minItems"),
-        Map.get(updated_schema, "uniqueIems"),
-        Map.get(updated_schema, "maxProperties"),
-        Map.get(updated_schema, "minProperties"),
-        # TODO(ian): Ignore this field if there are any `properties`
-        not Enum.empty?(Map.get(updated_schema, "required", [])),
-        Map.get(updated_schema, "enum"),
-        Map.get(updated_schema, "allOf"),
-        Map.get(updated_schema, "oneOf"),
-        Map.get(updated_schema, "anyOf"),
-        Map.get(updated_schema, "isNot"),
-        Map.get(updated_schema, "items"),
-        required_properties,
-        Map.get(updated_schema, "additionalProperties"),
-        Map.get(updated_schema, "default"),
-        Map.get(updated_schema, "nullable")
-      )
+    cond do
+      schema["$ref"] != nil ->
+        schema["$ref"]
+        |> parse_schema_name()
+        |> Repo.fetch_schema_by_name()
+        |> case do
+          {:ok, schema} ->
+            from_map(schema)
+
+          error ->
+            error
+        end
+
+      Map.has_key?(updated_schema, "type") ->
+        new(
+          updated_schema["type"] |> type_from_string(),
+          Map.get(updated_schema, "format") |> format_from_string(),
+          Map.get(updated_schema, "maximum"),
+          Map.get(updated_schema, "exclusiveMaximum"),
+          Map.get(updated_schema, "minimum"),
+          Map.get(updated_schema, "exclusiveMinimum"),
+          Map.get(updated_schema, "maxLength"),
+          Map.get(updated_schema, "minLength"),
+          Map.get(updated_schema, "pattern"),
+          Map.get(updated_schema, "maxItems"),
+          Map.get(updated_schema, "minItems"),
+          Map.get(updated_schema, "uniqueIems"),
+          Map.get(updated_schema, "maxProperties"),
+          Map.get(updated_schema, "minProperties"),
+          # TODO(ian): Ignore this field if there are any `properties`
+          not Enum.empty?(Map.get(updated_schema, "required", [])),
+          Map.get(updated_schema, "enum"),
+          Map.get(updated_schema, "allOf"),
+          Map.get(updated_schema, "oneOf"),
+          Map.get(updated_schema, "anyOf"),
+          Map.get(updated_schema, "isNot"),
+          Map.get(updated_schema, "items"),
+          required_properties,
+          Map.get(updated_schema, "additionalProperties"),
+          Map.get(updated_schema, "default"),
+          Map.get(updated_schema, "nullable")
+        )
+
+      true ->
+        new(:empty)
     end
   end
 
@@ -290,5 +305,12 @@ defmodule Oasis.Parser.Schema do
           pair
       end
     end)
+  end
+
+  @spec parse_schema_name(schema_ref :: String.t()) :: String.t()
+  def parse_schema_name(schema_ref) when is_binary(schema_ref) do
+    schema_ref
+    |> String.split("/")
+    |> List.last()
   end
 end
