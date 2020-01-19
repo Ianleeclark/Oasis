@@ -188,14 +188,14 @@ defmodule Oasis.Parser.Schema do
         Map.get(updated_schema, "uniqueIems"),
         Map.get(updated_schema, "maxProperties"),
         Map.get(updated_schema, "minProperties"),
-        Enum.any?(Map.get(updated_schema, "required", [])),
+        # TODO(ian): Ignore this field if there are any `properties`
+        not Enum.empty?(Map.get(updated_schema, "required", [])),
         Map.get(updated_schema, "enum"),
         Map.get(updated_schema, "allOf"),
         Map.get(updated_schema, "oneOf"),
         Map.get(updated_schema, "anyOf"),
         Map.get(updated_schema, "isNot"),
         Map.get(updated_schema, "items"),
-        # TODO(ian): Need to recurse and create updated_schemas
         required_properties,
         Map.get(updated_schema, "additionalProperties"),
         Map.get(updated_schema, "default"),
