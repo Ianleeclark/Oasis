@@ -35,7 +35,7 @@ defmodule Oasis.Parser.Operation do
   @spec new(
           operation_id :: String.t(),
           parameters :: [map()],
-          request_body :: map(),
+          request_body :: RequestBody.t() | map(),
           responses :: %{String.t() => any()},
           callbacks :: map() | nil,
           deprecated? :: bool,
@@ -56,17 +56,18 @@ defmodule Oasis.Parser.Operation do
     {:error, :endpoint_missing_operation_id}
   end
 
+  # a RequestBody `request_body`
   def new(
         operation_id,
         parameters,
-        request_body,
+        %RequestBody{} = request_body,
         responses,
         callbacks,
         deprecated?,
         security
       )
-      when is_binary(operation_id) and is_maybe_list(parameters) and is_map(responses) and
-             is_maybe_map(callbacks) and is_maybe_boolean(deprecated?) and is_maybe_map(security) do
+      when is_binary(operation_id) and is_list(parameters) and is_map(responses) and
+             is_map(callbacks) and is_boolean(deprecated?) and is_map(security) do
     %__MODULE__{
       operation_id: operation_id,
       parameters: parameters,
@@ -75,6 +76,23 @@ defmodule Oasis.Parser.Operation do
       callbacks: callbacks,
       deprecated?: deprecated?,
       security: security,
+      requires_auth?: requires_auth?(security)
+    }
+  end
+
+  # This has a map `request_body`
+  def new(operation_id, parameters, request_body, responses, callbacks, deprecated?, security)
+      when is_binary(operation_id) and is_maybe_list(parameters) and is_maybe_map(request_body) and
+             is_map(responses) and is_maybe_map(callbacks) and is_maybe_boolean(deprecated?) and
+             is_maybe_map(security) do
+    %__MODULE__{
+      operation_id: operation_id,
+      parameters: parameters || [],
+      request_body: RequestBody.from_map(request_body),
+      responses: Map.keys(responses),
+      callbacks: callbacks,
+      deprecated?: deprecated?,
+      security: security || %{},
       requires_auth?: requires_auth?(security)
     }
   end

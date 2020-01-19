@@ -4,7 +4,7 @@ defmodule Oasis.Parser.OAS do
   of the spec than referencing keys in a map.
   """
   import Oasis.Utils.Guards
-  alias Oasis.Parser.Path
+  alias Oasis.Parser.{Components, Path}
 
   @required_keys [:version, :security, :paths, :components]
   @enforce_keys @required_keys
@@ -31,7 +31,7 @@ defmodule Oasis.Parser.OAS do
       version: version,
       security: safe_security,
       paths: paths,
-      components: components
+      components: Components.from_map(components)
     }
   end
 end

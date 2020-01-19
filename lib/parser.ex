@@ -7,8 +7,8 @@ defmodule Oasis.Parser do
   all that good stuff.
   """
 
-  alias Oasis.Parser.Metadata
-  alias Oasis.Parser.{Metadata, OAS, Operation, Path}
+  alias Oasis.Parser.{Components, Metadata, OAS, Operation, Path}
+  alias Oasis.Schemas.Repo
 
   @doc """
   This is a roll-up of the following functions. It maps operation_ids to metadata.
@@ -16,10 +16,49 @@ defmodule Oasis.Parser do
   @spec load(raw_json :: binary()) :: %{(operation_id :: String.t()) => Metadata.t()}
   def load(raw_json) when is_binary(raw_json) do
     with {:ok, json_map} <- load_json(raw_json),
+         :ok <- preload_schemas_into_repo(Map.get(json_map, "components")),
          {:ok, %OAS{} = oas} <- map_json_to_oas_struct(json_map) do
       extract_metadata_from_operations(oas)
     end
   end
+
+  @spec preload_schemas_into_repo(OAS.t()) :: :ok | {:error, atom()}
+  defp preload_schemas_into_repo(%{"schemas" => schemas}) when is_map(schemas) do
+    schemas
+    |> Enum.map(fn {schema_name, schema} ->
+      Repo.store_schema_by_name(schema_name, schema)
+    end)
+    |> Enum.uniq()
+    |> case do
+      [:ok] ->
+        :ok
+
+      [:ok, error] ->
+        error
+    end
+  end
+
+  defp preload_schemas_into_repo(%OAS{components: %Components{schemas: schemas}})
+       when is_nil(schemas),
+       do: :ok
+
+  defp preload_schemas_into_repo(%OAS{components: %Components{schemas: schemas}})
+       when is_map(schemas) do
+    schemas
+    |> Enum.map(fn {schema_name, schema} ->
+      Repo.store_schema_by_name(schema_name, schema)
+    end)
+    |> Enum.uniq()
+    |> case do
+      [:ok] ->
+        :ok
+
+      [:ok, error] ->
+        error
+    end
+  end
+
+  defp preload_schemas_into_repo(_), do: :ok
 
   @doc """
   Takes a raw blob of json and returns an elixir map.
@@ -99,9 +138,11 @@ defmodule Oasis.Parser do
             nil
 
           {http_method, %Operation{} = operation} ->
+            alias Oasis.Schemas
+
             metadata =
               Metadata.new(
-                operation.request_body,
+                Schemas.create_ecto_schema(operation),
                 operation.requires_auth?,
                 operation.responses,
                 operation.parameters,

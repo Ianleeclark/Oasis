@@ -18,7 +18,22 @@ defmodule Oasis.Parser.MediaType do
         }
 
   @spec new(Schema.t(), String.t()) :: t()
-  def new(schema, encoding) do
+  def new(%Schema{} = schema, encoding) do
     %__MODULE__{schema: schema, encoding: encoding}
+  end
+
+  @spec from_map(media :: map()) :: t()
+  def from_map(_media, encoding \\ "application/json")
+  def from_map(nil, _encoding), do: nil
+
+  def from_map(media, encoding) when is_map(media) do
+    new(
+      Schema.from_map(media),
+      encoding
+    )
+  end
+
+  def from_map(%Schema{} = media, encoding) do
+    new(media, encoding)
   end
 end

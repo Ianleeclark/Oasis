@@ -6,6 +6,7 @@ defmodule Oasis.Parser.Schema do
   """
 
   import Oasis.Utils.Guards
+  alias Oasis.Schemas.Repo
 
   @required_keys [:type]
   @optional_keys [
@@ -126,7 +127,7 @@ defmodule Oasis.Parser.Schema do
              is_maybe_number(exclusive_minimum) and is_maybe_pos_integer(min_length) and
              is_maybe_pos_integer(max_length) and is_maybe_pos_integer(max_items) and
              is_maybe_pos_integer(min_items) and is_maybe_boolean(unique_items?) and
-             is_boolean(required?) and is_maybe_list(enum) and is_maybe_boolean(nullable?) and
+             is_maybe_boolean(required?) and is_maybe_list(enum) and is_maybe_boolean(nullable?) and
              is_maybe_map(properties) do
     %__MODULE__{
       maximum: maximum,
@@ -161,34 +162,61 @@ defmodule Oasis.Parser.Schema do
   Converts a json map into a `Schema.t()` 
   """
   @spec from_map(map()) :: t()
-  def from_map(%{} = input) do
-    new(
-      input["type"] |> type_from_string(),
-      Map.get(input, "format") |> format_from_string(),
-      Map.get(input, "maximum"),
-      Map.get(input, "exclusiveMaximum"),
-      Map.get(input, "minimum"),
-      Map.get(input, "exclusiveMinimum"),
-      Map.get(input, "maxLength"),
-      Map.get(input, "minLength"),
-      Map.get(input, "pattern"),
-      Map.get(input, "maxItems"),
-      Map.get(input, "minItems"),
-      Map.get(input, "uniqueIems"),
-      Map.get(input, "maxProperties"),
-      Map.get(input, "minProperties"),
-      Map.get(input, "required"),
-      Map.get(input, "enum"),
-      Map.get(input, "allOf"),
-      Map.get(input, "oneOf"),
-      Map.get(input, "anyOf"),
-      Map.get(input, "isNot"),
-      Map.get(input, "items"),
-      Map.get(input, "properties"),
-      Map.get(input, "additionalProperties"),
-      Map.get(input, "default"),
-      Map.get(input, "nullable")
-    )
+  def from_map(input) when is_map(input) do
+    schema = Map.get(input, "schema", %{})
+    # TODO(ian): Remove whenever references are handled
+
+    required_keys = Map.get(schema, "required", [])
+    properties = Map.get(schema, "properties", %{})
+    required_properties = inject_required_keys(properties, required_keys)
+    updated_schema = Map.put(schema, "properties", required_properties)
+
+    cond do
+      schema["$ref"] != nil ->
+        schema["$ref"]
+        |> parse_schema_name()
+        |> Repo.fetch_schema_by_name()
+        |> case do
+          {:ok, schema} ->
+            from_map(schema)
+
+          error ->
+            error
+        end
+
+      Map.has_key?(updated_schema, "type") ->
+        new(
+          updated_schema["type"] |> type_from_string(),
+          Map.get(updated_schema, "format") |> format_from_string(),
+          Map.get(updated_schema, "maximum"),
+          Map.get(updated_schema, "exclusiveMaximum"),
+          Map.get(updated_schema, "minimum"),
+          Map.get(updated_schema, "exclusiveMinimum"),
+          Map.get(updated_schema, "maxLength"),
+          Map.get(updated_schema, "minLength"),
+          Map.get(updated_schema, "pattern"),
+          Map.get(updated_schema, "maxItems"),
+          Map.get(updated_schema, "minItems"),
+          Map.get(updated_schema, "uniqueIems"),
+          Map.get(updated_schema, "maxProperties"),
+          Map.get(updated_schema, "minProperties"),
+          # TODO(ian): Ignore this field if there are any `properties`
+          not Enum.empty?(Map.get(updated_schema, "required", [])),
+          Map.get(updated_schema, "enum"),
+          Map.get(updated_schema, "allOf"),
+          Map.get(updated_schema, "oneOf"),
+          Map.get(updated_schema, "anyOf"),
+          Map.get(updated_schema, "isNot"),
+          Map.get(updated_schema, "items"),
+          required_properties,
+          Map.get(updated_schema, "additionalProperties"),
+          Map.get(updated_schema, "default"),
+          Map.get(updated_schema, "nullable")
+        )
+
+      true ->
+        new(:empty)
+    end
   end
 
   @doc """
@@ -224,11 +252,23 @@ defmodule Oasis.Parser.Schema do
   @spec type_from_string(type_string :: String.t()) :: atom() | {:error, :invalid_type}
   defp type_from_string(type_string) when is_binary(type_string) do
     case type_string do
-      "integer" -> :integer
-      "number" -> :number
-      "string" -> :string
-      "boolean" -> :boolean
-      _ -> {:error, :invalid_type}
+      "integer" ->
+        :integer
+
+      "number" ->
+        :number
+
+      "string" ->
+        :string
+
+      "boolean" ->
+        :boolean
+
+      "object" ->
+        :object
+
+      _ ->
+        {:error, :invalid_type}
     end
   end
 
@@ -250,5 +290,27 @@ defmodule Oasis.Parser.Schema do
       "password" -> :password
       _ -> {:error, :invalid_format}
     end
+  end
+
+  @spec inject_required_keys(properties :: map(), required_keys :: [String.t()]) :: map()
+  defp inject_required_keys(properties, required_keys)
+       when is_map(properties) and is_list(required_keys) do
+    properties
+    |> Enum.into(%{}, fn {property, x} = pair when is_map(x) ->
+      case Enum.member?(required_keys, property) do
+        true ->
+          {property, Map.put(x, "required", true)}
+
+        false ->
+          pair
+      end
+    end)
+  end
+
+  @spec parse_schema_name(schema_ref :: String.t()) :: String.t()
+  def parse_schema_name(schema_ref) when is_binary(schema_ref) do
+    schema_ref
+    |> String.split("/")
+    |> List.last()
   end
 end
