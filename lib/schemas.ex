@@ -7,7 +7,7 @@ defmodule Oasis.Schemas do
   alias Oasis.Schemas.FieldFactory
 
   @spec create_ecto_schema(Operation.t()) :: {:ok, any()}
-  def create_ecto_schema(%Operation{request_body: nil}), do: {:ok, nil}
+  def create_ecto_schema(%Operation{request_body: nil}), do: nil
 
   def create_ecto_schema(%Operation{} = operation) do
     # TODO(ian): We can reload these schemas with `Metadata.put_meta/2`
@@ -43,14 +43,26 @@ defmodule Oasis.Schemas do
       %MediaType{schema: %Schema{type: :empty}} ->
         :ok
 
-      %MediaType{schema: %Schema{} = schema} ->
+      %MediaType{schema: %Schema{properties: nil}} ->
+        :ok
+
+      %MediaType{schema: %Schema{properties: []}} ->
+        :ok
+
+      %MediaType{schema: %Schema{properties: properties}} ->
         # TODO(ian): Handle arrays
-        # TODO(ian): Handle no properties 
         # TODO(ian): Handle references
-        Enum.map(schema.properties, fn {k, %Schema{} = v} ->
-          # TODO(ian): Enable multiple content-types
-          FieldFactory.create_field(k, v)
-        end)
+        Enum.map(
+          properties,
+          fn
+            {_k, %Schema{type: :object}} ->
+              :ok
+
+            {k, %Schema{} = v} ->
+              # TODO(ian): Enable multiple content-types
+              FieldFactory.create_field(k, v)
+          end
+        )
     end
   end
 

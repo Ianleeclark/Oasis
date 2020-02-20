@@ -9,14 +9,18 @@ defmodule Oasis do
 
   @http Application.get_env(:oasis, :http_module)
 
+  @spec load_metadata_by_opids(filename :: Path.t()) :: {:ok, map()}
+  def load_metadata_by_opids(filename) do
+    filename
+    |> File.read!()
+    |> Parser.load()
+  end
+
   @spec register_endpoints_from_filename(filename :: Path.t()) ::
           {:module, module(), binary(), term()}
   def register_endpoints_from_filename(filename) do
     # NOTE(ian): Can we use `defoverridable` to make these dynamically defined and swap out modules at runtime
-    {:ok, metadata_by_opids} =
-      filename
-      |> File.read!()
-      |> Parser.load()
+    {:ok, metadata_by_opids} = load_metadata_by_opids(filename)
 
     # Contents are the AST of the module. There are two things of note here:
     # 1.) `call/6` which handles sending requests

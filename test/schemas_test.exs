@@ -9,7 +9,8 @@ defmodule Oasis.SchemasTest do
       type: :object,
       properties: %{
         "test_field" => %Schema{type: :boolean},
-        "string_field" => %Schema{type: :string, format: :date}
+        "string_field" => %Schema{type: :string, format: :date},
+        "object_field" => %Schema{type: :object, properties: []}
       }
     }
 

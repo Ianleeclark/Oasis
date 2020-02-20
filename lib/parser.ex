@@ -7,7 +7,7 @@ defmodule Oasis.Parser do
   all that good stuff.
   """
 
-  alias Oasis.Parser.{Components, Metadata, OAS, Operation, Path}
+  alias Oasis.Parser.{Components, Metadata, OAS, Operation, Path, Schema}
   alias Oasis.Schemas.Repo
 
   @doc """
@@ -26,7 +26,7 @@ defmodule Oasis.Parser do
   defp preload_schemas_into_repo(%{"schemas" => schemas}) when is_map(schemas) do
     schemas
     |> Enum.map(fn {schema_name, schema} ->
-      Repo.store_schema_by_name(schema_name, schema)
+      Repo.store_schema_by_name(schema_name, schema |> Schema.from_map())
     end)
     |> Enum.uniq()
     |> case do
@@ -46,7 +46,7 @@ defmodule Oasis.Parser do
        when is_map(schemas) do
     schemas
     |> Enum.map(fn {schema_name, schema} ->
-      Repo.store_schema_by_name(schema_name, schema)
+      Repo.store_schema_by_name(schema_name, schema |> Schema.from_map())
     end)
     |> Enum.uniq()
     |> case do
