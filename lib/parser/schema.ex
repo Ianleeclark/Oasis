@@ -203,39 +203,42 @@ defmodule Oasis.Parser.Schema do
             from_map(schema)
         end
 
-      # TODO(ian): ARRAY ARRAY ARRAY (most likely)
-      updated_schema["type"] |> type_from_string() == {:error, :invalid_type} ->
-        new(:empty)
-
       Map.has_key?(updated_schema, "type") ->
-        new(
-          updated_schema["type"] |> type_from_string(),
-          Map.get(updated_schema, "format") |> format_from_string(),
-          Map.get(updated_schema, "maximum"),
-          Map.get(updated_schema, "exclusiveMaximum"),
-          Map.get(updated_schema, "minimum"),
-          Map.get(updated_schema, "exclusiveMinimum"),
-          Map.get(updated_schema, "maxLength"),
-          Map.get(updated_schema, "minLength"),
-          Map.get(updated_schema, "pattern"),
-          Map.get(updated_schema, "maxItems"),
-          Map.get(updated_schema, "minItems"),
-          Map.get(updated_schema, "uniqueIems"),
-          Map.get(updated_schema, "maxProperties"),
-          Map.get(updated_schema, "minProperties"),
-          # TODO(ian): Ignore this field if there are any `properties`
-          not Enum.empty?(required_keys),
-          Map.get(updated_schema, "enum"),
-          Map.get(updated_schema, "allOf"),
-          Map.get(updated_schema, "oneOf"),
-          Map.get(updated_schema, "anyOf"),
-          Map.get(updated_schema, "isNot"),
-          Map.get(updated_schema, "items"),
-          required_properties,
-          Map.get(updated_schema, "additionalProperties"),
-          Map.get(updated_schema, "default"),
-          Map.get(updated_schema, "nullable")
-        )
+        case updated_schema["type"] |> type_from_string() do
+          {:error, :invalid_type} ->
+            # TODO(ian): ARRAY ARRAY ARRAY (most likely)
+            new(:empty)
+
+          _ ->
+            new(
+              updated_schema["type"] |> type_from_string(),
+              Map.get(updated_schema, "format") |> format_from_string(),
+              Map.get(updated_schema, "maximum"),
+              Map.get(updated_schema, "exclusiveMaximum"),
+              Map.get(updated_schema, "minimum"),
+              Map.get(updated_schema, "exclusiveMinimum"),
+              Map.get(updated_schema, "maxLength"),
+              Map.get(updated_schema, "minLength"),
+              Map.get(updated_schema, "pattern"),
+              Map.get(updated_schema, "maxItems"),
+              Map.get(updated_schema, "minItems"),
+              Map.get(updated_schema, "uniqueIems"),
+              Map.get(updated_schema, "maxProperties"),
+              Map.get(updated_schema, "minProperties"),
+              # TODO(ian): Ignore this field if there are any `properties`
+              not Enum.empty?(required_keys),
+              Map.get(updated_schema, "enum"),
+              Map.get(updated_schema, "allOf"),
+              Map.get(updated_schema, "oneOf"),
+              Map.get(updated_schema, "anyOf"),
+              Map.get(updated_schema, "isNot"),
+              Map.get(updated_schema, "items"),
+              required_properties,
+              Map.get(updated_schema, "additionalProperties"),
+              Map.get(updated_schema, "default"),
+              Map.get(updated_schema, "nullable")
+            )
+        end
 
       true ->
         new(:empty)

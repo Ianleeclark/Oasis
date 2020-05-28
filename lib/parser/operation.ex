@@ -112,7 +112,7 @@ defmodule Oasis.Parser.Operation do
 
   def from_map(json_map) when is_map(json_map) do
     new(
-      json_map["operationId"],
+      json_map["operationId"] |> String.replace("-", "_"),
       json_map["parameters"],
       json_map["requestBody"],
       json_map["responses"],
