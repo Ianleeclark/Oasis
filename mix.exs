@@ -43,7 +43,7 @@ defmodule Oasis.MixProject do
       ## Used for testing the HTTP behavior and during testing
       {:httpoison, "~> 1.5.1", only: [:dev, :test]},
       ## Shows coverage % for tests
-      {:excoveralls, "~> 0.10", only: :test}
+      {:excoveralls, "~> 0.10", only: [:dev, :test]}
     ]
   end
 end

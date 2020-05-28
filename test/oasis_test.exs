@@ -2,6 +2,8 @@ defmodule OasisTest do
   use ExUnit.Case
   doctest Oasis
 
+  @moduletag timeout: 1_000
+
   describe "register_endpoints_from_filename/1" do
     test "Ensure can parse OAS-provided examples." do
       Path.absname("./test/data")

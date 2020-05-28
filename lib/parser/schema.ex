@@ -203,6 +203,10 @@ defmodule Oasis.Parser.Schema do
             from_map(schema)
         end
 
+      # TODO(ian): ARRAY ARRAY ARRAY (most likely)
+      updated_schema["type"] |> type_from_string() == {:error, :invalid_type} ->
+        new(:empty)
+
       Map.has_key?(updated_schema, "type") ->
         new(
           updated_schema["type"] |> type_from_string(),

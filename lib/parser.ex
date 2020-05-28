@@ -25,8 +25,8 @@ defmodule Oasis.Parser do
   @spec preload_schemas_into_repo(OAS.t()) :: :ok | {:error, atom()}
   defp preload_schemas_into_repo(%{"schemas" => schemas}) when is_map(schemas) do
     schemas
-    |> Enum.map(fn {schema_name, schema} ->
-      Repo.store_schema_by_name(schema_name, schema |> Schema.from_map())
+    |> Enum.map(fn {schema_name, schema_map} ->
+      Repo.store_schema_by_name(schema_name, schema_map |> Schema.from_map())
     end)
     |> Enum.uniq()
     |> case do
@@ -45,8 +45,8 @@ defmodule Oasis.Parser do
   defp preload_schemas_into_repo(%OAS{components: %Components{schemas: schemas}})
        when is_map(schemas) do
     schemas
-    |> Enum.map(fn {schema_name, schema} ->
-      Repo.store_schema_by_name(schema_name, schema |> Schema.from_map())
+    |> Enum.map(fn {schema_name, schema_map} ->
+      Repo.store_schema_by_name(schema_name, schema_map |> Schema.from_map())
     end)
     |> Enum.uniq()
     |> case do
