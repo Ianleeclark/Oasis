@@ -272,6 +272,9 @@ defmodule Oasis.Parser.Schema do
     end
   end
 
+  @spec valid_types() :: [atom()]
+  def valid_types, do: [:integer, :number, :string, :boolean, :object]
+
   @spec format_from_string(format_string :: String.t() | nil) ::
           atom() | {:error, :invalid_format}
   defp format_from_string(nil), do: nil
@@ -291,6 +294,20 @@ defmodule Oasis.Parser.Schema do
       _ -> {:error, :invalid_format}
     end
   end
+
+  @spec valid_formats() :: [atom()]
+  def valid_formats,
+    do: [
+      :int32,
+      :int64,
+      :float,
+      :double,
+      :byte,
+      :binary,
+      :date,
+      :date_time,
+      :password
+    ]
 
   @spec inject_required_keys(properties :: map(), required_keys :: [String.t()]) :: map()
   defp inject_required_keys(properties, required_keys)
