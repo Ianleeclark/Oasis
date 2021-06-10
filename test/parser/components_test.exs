@@ -36,6 +36,8 @@ defmodule Oasis.Parser.ComponentsTest do
   property "Constructs normally" do
     check all(schemas <- StreamData.map_of(StreamData.string(:ascii), StreamData.integer())) do
       components = Components.new(schemas)
+
+      assert components.schemas == schemas
     end
   end
 end
