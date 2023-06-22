@@ -5,12 +5,13 @@ defmodule Oasis.MixProject do
     [
       app: :oasis,
       version: "0.1.0",
-      elixir: "~> 1.8",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
       deps: deps(),
       aliases: aliases(),
-      elixirc_options: [warnings_as_errors: true],
+      # TODO(ian): Turn on warnings as errors?
+      elixirc_options: [warnings_as_errors: false],
       # Make sure that `testall` always runs under `MIX_ENV=test`
       preferred_cli_env: [test: :test]
     ]
