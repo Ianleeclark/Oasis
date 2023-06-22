@@ -5,6 +5,7 @@ defmodule Oasis.Parser.Components do
   https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#componentsObject
   """
   import Oasis.Utils.Guards
+  alias Oasis.Parser.Schema
 
   @required_keys [:schemas]
   @enforce_keys @required_keys
@@ -14,7 +15,7 @@ defmodule Oasis.Parser.Components do
           schemas: map() | nil
         }
 
-  @spec new(schemas :: map() | nil) :: t()
+  @spec new(schemas :: %{String.t() => Schema.t()} | nil) :: t()
   def new(schemas) when is_maybe_map(schemas) do
     %__MODULE__{
       schemas: schemas
@@ -25,6 +26,11 @@ defmodule Oasis.Parser.Components do
   def from_map(nil), do: new(nil)
 
   def from_map(map) when is_map(map) do
-    new(Map.get(map, "schemas"))
+    map
+    |> Map.get("schemas", %{})
+    |> Enum.into(%{}, fn {name, schema} ->
+      {name, Schema.from_map(schema)}
+    end)
+    |> new()
   end
 end

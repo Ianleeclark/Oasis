@@ -2,6 +2,7 @@ defmodule Oasis.Parser.ComponentsTest do
   use ExUnit.Case
 
   alias Oasis.Parser.Components
+  alias Oasis.Parser.Schema
 
   describe "new/1" do
     test "Non-nil value" do
@@ -19,9 +20,9 @@ defmodule Oasis.Parser.ComponentsTest do
 
   describe "from_map/1" do
     test "Non-nil value" do
-      retval = Components.from_map(%{"schemas" => %{foo: "bar"}})
+      retval = Components.from_map(%{"schemas" => %{foo: %{}}})
 
-      assert Map.get(retval.schemas, :foo) == "bar"
+      assert Map.get(retval.schemas, :foo) == Schema.new(:empty)
     end
 
     test "Nil value" do
