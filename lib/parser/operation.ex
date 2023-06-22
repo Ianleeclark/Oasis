@@ -109,16 +109,22 @@ defmodule Oasis.Parser.Operation do
   """
   @spec from_map(json_map :: %{String.t() => any()}) :: t() | nil
   def from_map(nil), do: nil
+  # TODO(ian): Do we want to do anything with this? Seems to be caused by callbacks. 
+  def from_map(%{"operationId" => nil}), do: nil
 
   def from_map(json_map) when is_map(json_map) do
-    new(
-      json_map["operationId"] |> String.replace("-", "_"),
-      json_map["parameters"],
-      json_map["requestBody"],
-      json_map["responses"],
-      json_map["callbacks"],
-      json_map["deprecated"],
-      json_map["security"]
-    )
+    if is_nil(json_map["operationId"]) or not Map.has_key?(json_map, "operationId") do
+      nil
+    else
+      new(
+        json_map["operationId"] |> String.replace("-", "_"),
+        json_map["parameters"],
+        json_map["requestBody"],
+        json_map["responses"],
+        json_map["callbacks"],
+        json_map["deprecated"],
+        json_map["security"]
+      )
+    end
   end
 end
